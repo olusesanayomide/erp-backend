@@ -6,6 +6,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private prisma = new PrismaClient({
     datasources: { db: { url: process.env.DATABASE_URL } },
   });
+  inventoryItem: any;
 
   async onModuleInit() {
     await this.prisma.$connect();
