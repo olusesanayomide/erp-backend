@@ -6,8 +6,10 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('inventory')
+@ApiTags('Inventory')
+@Controller('Inventory')
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 

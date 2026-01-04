@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from 'prisma/prisma.service';
 import { StockMovementType } from '@prisma/client';
 
 @Injectable()
@@ -18,7 +18,8 @@ export class InventoryService {
 
   // Add stock to a warehouse
   async stockIn(productId: string, warehouseId: string, quantity: number) {
-    if (quantity <= 0) throw new BadRequestException('Quantity must be greater than 0');
+    if (quantity <= 0)
+      throw new BadRequestException('Quantity must be greater than 0');
 
     return this.prisma.$transaction([
       // Record the stock movement
@@ -79,6 +80,5 @@ export class InventoryService {
         data: { quantity: { decrement: quantity } },
       }),
     ]);
-    
   }
 }
