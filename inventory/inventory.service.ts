@@ -16,6 +16,17 @@ export class InventoryService {
     });
   }
 
+  // Get Inventory by Warehouse
+  async getInventoryByWarehouse(warehouseId: string) {
+    return this.prisma.inventoryItem.findMany({
+      where: { warehouseId },
+      include: {
+        product: true,
+        warehouse: true,
+      },
+    });
+  }
+
   // Add stock to a warehouse
   async stockIn(productId: string, warehouseId: string, quantity: number) {
     if (quantity <= 0)
@@ -80,5 +91,19 @@ export class InventoryService {
         data: { quantity: { decrement: quantity } },
       }),
     ]);
+  }
+
+  // Get all stock movements
+  async getStockMovements(_page: number, _limit: number) {
+    const skip = (_page - 1) * _limit;
+    return this.prisma.stockMovement.findMany({
+      skip,
+      take: _limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        product: true,
+        warehouse: true,
+      },
+    });
   }
 }
