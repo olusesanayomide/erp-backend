@@ -29,8 +29,22 @@ export class InventoryService {
 
   // Add stock to a warehouse
   async stockIn(productId: string, warehouseId: string, quantity: number) {
-    if (quantity <= 0)
+    if (quantity <= 0) {
       throw new BadRequestException('Quantity must be greater than 0');
+    }
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
+    if (!product) {
+      throw new BadRequestException('Product does not exist');
+    }
+
+    const warehouse = await this.prisma.warehouse.findUnique({
+      where: { id: warehouseId },
+    });
+    if (!warehouse) {
+      throw new BadRequestException('Warehouse does not exist');
+    }
 
     return this.prisma.$transaction([
       // Record the stock movement
@@ -96,7 +110,7 @@ export class InventoryService {
   // Get all stock movements
   async getStockMovements(_page: number, _limit: number) {
     const skip = (_page - 1) * _limit;
-    return this.prisma.stockMovement.findMany({
+    const movement = await this.prisma.stockMovement.findMany({
       skip,
       take: _limit,
       orderBy: { createdAt: 'desc' },
@@ -105,5 +119,7 @@ export class InventoryService {
         warehouse: true,
       },
     });
+    console.log('movements fetched:', movement.length);
+    return movement;
   }
 }

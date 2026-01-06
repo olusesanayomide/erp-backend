@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  NotFoundException,
+} from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { ApiTags } from '@nestjs/swagger';
 import { StockMovementDto } from './dto/stock-movement.dto';
@@ -15,15 +23,25 @@ export class InventoryController {
 
   @Get(':warehouseId')
   async getWarehouseInventory(@Param('warehouseId') warehouseId: string) {
-    return this.inventoryService.getInventoryByWarehouse(warehouseId);
+    const items =
+      await this.inventoryService.getInventoryByWarehouse(warehouseId);
+
+    if (!items || items.length === 0) {
+      throw new NotFoundException(
+        'Warehouse not found or has no inventory items.',
+      );
+    }
+    return items;
   }
 
   @Get('movements')
   async getStockMovements(
-    @Query('page') _page = 1,
-    @Query('limit') _limit = 10,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
-    return this.inventoryService.getStockMovements(+_page, +_limit);
+    const _page = Number(page) || 1;
+    const _limit = Number(limit) || 10;
+    return this.inventoryService.getStockMovements(_page, _limit);
   }
 
   @Post('stock-in')
