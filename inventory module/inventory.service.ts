@@ -107,19 +107,19 @@ export class InventoryService {
     ]);
   }
 
-  // Get all stock movements
-  async getStockMovements(_page: number, _limit: number) {
-    const skip = (_page - 1) * _limit;
-    const movement = await this.prisma.stockMovement.findMany({
-      skip,
-      take: _limit,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        product: true,
-        warehouse: true,
-      },
-    });
-    console.log('movements fetched:', movement.length);
-    return movement;
-  }
+  // // Get all stock movements
+  // async getStockMovements(_page: number, _limit: number) {
+  //   const skip = (_page - 1) * _limit;
+  //   const movement = await this.prisma.stockMovement.findMany({
+  //     skip,
+  //     take: _limit,
+  //     orderBy: { createdAt: 'desc' },
+  //     include: {
+  //       product: true,
+  //       warehouse: true,
+  //     },
+  //   });
+  //   console.log('movements fetched:', movement.length);
+  //   return movement;
+  // }
 }

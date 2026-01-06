@@ -4,7 +4,7 @@ import {
   Post,
   Body,
   Param,
-  Query,
+  // Query,
   NotFoundException,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
@@ -34,15 +34,15 @@ export class InventoryController {
     return items;
   }
 
-  @Get('movements')
-  async getStockMovements(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
-    const _page = Number(page) || 1;
-    const _limit = Number(limit) || 10;
-    return this.inventoryService.getStockMovements(_page, _limit);
-  }
+  // @Get('movements')
+  // async getStockMovements(
+  //   @Query('page') page?: string,
+  //   @Query('limit') limit?: string,
+  // ) {
+  //   const _page = Number(page) || 1;
+  //   const _limit = Number(limit) || 10;
+  //   return this.inventoryService.getStockMovements(_page, _limit);
+  // }
 
   @Post('stock-in')
   async stockIn(@Body() dto: StockMovementDto) {
