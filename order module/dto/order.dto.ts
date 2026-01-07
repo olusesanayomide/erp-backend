@@ -1,0 +1,39 @@
+// orders.dto.ts
+import { OrderStatus } from '@prisma/client';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  IsPositive,
+  IsEnum,
+} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CreateOrderDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  customerId?: string;
+}
+
+export class AddOrderItemDto {
+  @ApiProperty({ description: 'ID of the product' })
+  @IsUUID()
+  productId: string;
+
+  @ApiProperty({ description: 'Quantity of the product' })
+  @IsInt()
+  @IsPositive()
+  quantity: number;
+
+  @ApiProperty({ description: 'Price of the product' })
+  @IsPositive()
+  price: number;
+}
+
+export class UpdateOrderStatusDto {
+  @ApiProperty({ description: 'New status of the order', enum: OrderStatus })
+  @IsEnum(OrderStatus)
+  status: OrderStatus;
+}
