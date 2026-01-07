@@ -5,10 +5,17 @@ import {
   AddOrderItemDto,
   UpdateOrderStatusDto,
 } from './dto/order.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('orders')
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
+
+  @Get()
+  findAll() {
+    return this.ordersService.getOrders();
+  }
 
   @Post()
   create(@Body() dto: CreateOrderDto) {
@@ -17,17 +24,14 @@ export class OrdersController {
 
   @Post(':id/items')
   addItem(@Param('id') orderId: string, @Body() dto: AddOrderItemDto) {
+    const { productId, quantity, price, warehouseId } = dto;
     return this.ordersService.addItem(
       orderId,
-      dto.productId,
-      dto.quantity,
-      dto.price,
+      productId,
+      quantity,
+      price,
+      warehouseId,
     );
-  }
-
-  @Get()
-  findAll() {
-    return this.ordersService.getOrders();
   }
 
   @Patch(':id/status')
