@@ -26,7 +26,6 @@ export class OrdersService {
     orderId: string,
     productId: string,
     quantity: number,
-    price: number,
     warehouseId: string, // warehouse to reduce stock from
   ) {
     // Fetch the order
@@ -39,6 +38,13 @@ export class OrdersService {
     if (order.status !== OrderStatus.DRAFT)
       throw new BadRequestException('Cannot add items to a non-draft order');
 
+    // Fetch product price
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
+    if (!product) throw new BadRequestException('product not found');
+    const price = product.price;
+
     // Check stock
     const inventory = await this.prisma.inventoryItem.findUnique({
       where: { productId_warehouseId: { productId, warehouseId } },
@@ -47,6 +53,8 @@ export class OrdersService {
     if (!inventory || inventory.quantity < quantity) {
       throw new BadRequestException('Insufficient stock');
     }
+
+    await this.inventoryService.stockOut(productId, warehouseId, quantity);
 
     // Add item
     const orderItem = await this.prisma.orderItem.create({
@@ -105,12 +113,29 @@ export class OrdersService {
       ) {
         throw new BadRequestException('order already processed');
       }
-
-      // Optionally: validate status transitions here
-      return this.prisma.order.update({
-        where: { id: orderId },
-        data: { status },
-      });
     }
+    //only reverse order when cancelling confirmed order
+    const previousStatus = order.status;
+
+    const isCancellingConfirmedOrder =
+      status === OrderStatus.CANCELLED &&
+      (previousStatus === OrderStatus.CONFIRMED ||
+        previousStatus === OrderStatus.COMPLETED);
+
+    if (isCancellingConfirmedOrder) {
+      for (const item of order.items) {
+        await this.inventoryService.stockIn(
+          item.productId,
+          item.warehouseId,
+          item.quantity,
+        );
+      }
+    }
+    // Optionally: validate status transitions here
+
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: { status },
+    });
   }
 }

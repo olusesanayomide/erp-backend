@@ -24,12 +24,11 @@ export class OrdersController {
 
   @Post(':id/items')
   addItem(@Param('id') orderId: string, @Body() dto: AddOrderItemDto) {
-    const { productId, quantity, price, warehouseId } = dto;
+    const { productId, quantity, warehouseId } = dto;
     return this.ordersService.addItem(
       orderId,
       productId,
       quantity,
-      price,
       warehouseId,
     );
   }

@@ -7,7 +7,6 @@ import {
   IsUUID,
   IsPositive,
   IsEnum,
-  Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -31,11 +30,6 @@ export class AddOrderItemDto {
   @IsInt()
   @IsPositive()
   quantity: number;
-
-  @ApiProperty({ description: 'Price of the product' })
-  @IsPositive()
-  @Min(0)
-  price: number;
 }
 
 export class UpdateOrderStatusDto {
