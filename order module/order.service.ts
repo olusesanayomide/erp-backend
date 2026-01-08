@@ -48,9 +48,6 @@ export class OrdersService {
       throw new BadRequestException('Insufficient stock');
     }
 
-    // Reduce stock via inventory service
-    await this.inventoryService.stockOut(productId, warehouseId, quantity);
-
     // Add item
     const orderItem = await this.prisma.orderItem.create({
       data: {
@@ -86,13 +83,34 @@ export class OrdersService {
   async updateStatus(orderId: string, status: OrderStatus) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
+      include: { items: true },
     });
     if (!order) throw new BadRequestException('Order not found');
 
-    // Optionally: validate status transitions here
-    return this.prisma.order.update({
-      where: { id: orderId },
-      data: { status },
-    });
+    // Only deduct stock when moving to CONFIRMED
+    const isConfirmingOrder =
+      order.status === OrderStatus.DRAFT && status === OrderStatus.CONFIRMED;
+
+    if (isConfirmingOrder) {
+      for (const item of order.items) {
+        await this.inventoryService.stockOut(
+          item.productId,
+          item.warehouseId,
+          item.quantity,
+        );
+      }
+      if (
+        order.status !== OrderStatus.DRAFT &&
+        status === OrderStatus.CONFIRMED
+      ) {
+        throw new BadRequestException('order already processed');
+      }
+
+      // Optionally: validate status transitions here
+      return this.prisma.order.update({
+        where: { id: orderId },
+        data: { status },
+      });
+    }
   }
 }
