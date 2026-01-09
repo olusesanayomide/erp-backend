@@ -28,6 +28,7 @@ model Warehouse {
   name String
   inventoryItems InventoryItem[]
   stockMovements StockMovement[]
+  purchases Purchase[]
 }
 
 model Product {
@@ -41,6 +42,7 @@ model Product {
   inventoryItems InventoryItem[]
   stockMovements StockMovement[]
   orderItems     OrderItem[]
+  purchaseItems PurchaseItem[]
 }
 
 model InventoryItem {
@@ -109,5 +111,47 @@ model Customer{
   name String
   email  String @unique
   orders Order[] 
-
 }
+
+model Supplier {
+  id        String     @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  address   String?    // Added: Useful for generating PO documents
+  purchases Purchase[]
+  createdAt DateTime   @default(now())
+}
+
+model Purchase {
+  id            String          @id @default(uuid())
+  purchaseOrder String          @unique  
+  supplierId    String
+  supplier      Supplier        @relation(fields: [supplierId], references: [id])
+  warehouseId String
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+  status        PurchaseStatus  @default(DRAFT)
+  totalAmount   Float           @default(0)
+  items         PurchaseItem[]
+  receivedAt    DateTime?       // Added: Track when inventory actually increased
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model PurchaseItem {
+  id         String   @id @default(uuid())
+  purchaseId String
+  purchase   Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  quantity   Int
+  price      Float    // This is the unit price at the time of purchase
+}
+enum PurchaseStatus {
+  DRAFT
+  CONFIRMED
+  SHIPPED
+  RECEIVED
+  CANCELLED
+}
+
