@@ -7,8 +7,16 @@ import { PrismaService } from 'prisma/prisma.service';
 import { createPurchaseDto } from './dto/create-purchase.dto';
 
 @Injectable()
-export class ProcurementService {
+export class PurchaseService {
   constructor(private prisma: PrismaService) {}
+  // Get purchase Order
+  async getPurchaseDetails(id: string) {
+    return this.prisma.purchase.findUnique({
+      where: { id },
+      include: { items: true, supplier: true, warehouse: true },
+    });
+  }
+
   // Create Purchase
   async createPurchase(dto: createPurchaseDto) {
     const totalAmount = dto.items.reduce((sum, item) => {

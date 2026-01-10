@@ -4,11 +4,14 @@ import { IsDate, IsNumber, IsString, IsNotEmpty } from 'class-validator';
 export class PurchaseItemDto {
   @IsString()
   @IsNotEmpty()
+  @ApiProperty()
   productId: string;
 
   @IsNumber()
+  @ApiProperty()
   quantity: number;
 
+  @ApiProperty()
   @IsNumber()
   price: number;
   unitPrice: number;
@@ -34,8 +37,10 @@ export class createPurchaseDto {
     example: 1500.75,
     description: 'Total amount of the purchase',
   })
+  @ApiProperty()
   @IsNumber()
   totalAmount: number;
 
+  @ApiProperty()
   items: PurchaseItemDto[];
 }
