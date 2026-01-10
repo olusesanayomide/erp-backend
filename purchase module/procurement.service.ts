@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { createPurchaseDto } from './dto/create-purchase.dto';
 
@@ -7,10 +11,9 @@ export class ProcurementService {
   constructor(private prisma: PrismaService) {}
   // Create Purchase
   async createPurchase(dto: createPurchaseDto) {
-    const totalAmount =
-      dto.items.reduce((sum, item) => {
-        return sum + item.quantity * item.unitPrice;
-      }, 0) || 0;
+    const totalAmount = dto.items.reduce((sum, item) => {
+      return sum + item.quantity * item.unitPrice;
+    }, 0);
     return this.prisma.purchase.create({
       data: {
         purchaseOrder: dto.purchaseOrder,
@@ -22,7 +25,7 @@ export class ProcurementService {
           create: dto.items.map((items) => ({
             productId: items.productId,
             quantity: items.quantity,
-            price: items.price,
+            price: items.unitPrice,
           })),
         },
       },
@@ -37,7 +40,7 @@ export class ProcurementService {
         include: { items: true },
       });
       if (!purchase) {
-        throw new BadRequestException('Purchase order not found');
+        throw new NotFoundException('Purchase order not found');
       }
       if (purchase.status === 'RECEIVED') {
         throw new BadRequestException('Purchase order already received');
