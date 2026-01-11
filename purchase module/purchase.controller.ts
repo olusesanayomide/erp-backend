@@ -8,7 +8,7 @@ import { ApiTags } from '@nestjs/swagger';
 export class PurchaseContoller {
   constructor(private readonly purchaseService: PurchaseService) {}
 
-  @Post('/Purchase Orders')
+  @Post()
   async create(@Body() dto: CreatePurchaseDto) {
     return await this.purchaseService.createPurchase(dto);
   }
