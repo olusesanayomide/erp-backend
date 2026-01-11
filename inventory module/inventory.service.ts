@@ -8,23 +8,36 @@ export class InventoryService {
 
   // Get all inventory items
   async getInventory() {
-    return this.prisma.inventoryItem.findMany({
-      include: {
-        product: true,
-        warehouse: true,
+    const groups = await this.prisma.stockMovement.groupBy({
+      by: ['productId', 'warehouseId'],
+      _sum: {
+        quantity: true,
       },
     });
+
+    return groups.map((item) => ({
+      product: item.productId,
+      location: item.warehouseId,
+      availableStock: item._sum.quantity || 0,
+      status: (item._sum.quantity || 0) > 10 ? 'IN_STOCK' : 'LOW_STOCK',
+    }));
   }
 
   // Get Inventory by Warehouse
   async getInventoryByWarehouse(warehouseId: string) {
-    return this.prisma.inventoryItem.findMany({
+    const stock = await this.prisma.stockMovement.groupBy({
+      by: ['productId'],
       where: { warehouseId },
-      include: {
-        product: true,
-        warehouse: true,
+      _sum: {
+        quantity: true,
       },
     });
+
+    return stock.map((item) => ({
+      productId: item.productId,
+      warehouseId,
+      totalQuantity: item._sum.quantity || 0,
+    }));
   }
 
   // Add stock to a warehouse
@@ -95,7 +108,7 @@ export class InventoryService {
         data: {
           productId,
           warehouseId,
-          quantity,
+          quantity: -quantity,
           type: StockMovementType.OUT,
           reference: 'API_STOCK_OUT',
         },
