@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-import { createPurchaseDto } from './dto/create-purchase.dto';
+import { CreatePurchaseDto } from './dto/create-purchase.dto';
 
 @Injectable()
 export class PurchaseService {
@@ -18,9 +18,9 @@ export class PurchaseService {
   }
 
   // Create Purchase
-  async createPurchase(dto: createPurchaseDto) {
+  async createPurchase(dto: CreatePurchaseDto) {
     const totalAmount = dto.items.reduce((sum, item) => {
-      return sum + item.quantity * item.unitPrice;
+      return sum + item.quantity * item.price;
     }, 0);
     return this.prisma.purchase.create({
       data: {
@@ -33,7 +33,7 @@ export class PurchaseService {
           create: dto.items.map((items) => ({
             productId: items.productId,
             quantity: items.quantity,
-            price: items.unitPrice,
+            price: items.price,
           })),
         },
       },

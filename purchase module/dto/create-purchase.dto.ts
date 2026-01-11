@@ -1,46 +1,48 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsNumber, IsString, IsNotEmpty } from 'class-validator';
+import {
+  IsNumber,
+  IsString,
+  IsNotEmpty,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class PurchaseItemDto {
+  @ApiProperty({ example: 'uuid-of-product' })
   @IsString()
   @IsNotEmpty()
-  @ApiProperty()
   productId: string;
 
+  @ApiProperty({ example: 10 })
   @IsNumber()
-  @ApiProperty()
   quantity: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 150.0, description: 'Price per single unit' })
   @IsNumber()
   price: number;
-  unitPrice: number;
 }
-export class createPurchaseDto {
-  @ApiProperty({})
+
+export class CreatePurchaseDto {
+  @ApiProperty({ example: 'PO-2026-001' })
   @IsString()
+  @IsNotEmpty()
   purchaseOrder: string;
 
-  @ApiProperty({})
+  @ApiProperty({ example: 'uuid-of-warehouse' })
   @IsString()
   warehouseId: string;
 
-  @ApiProperty({ example: 1, description: 'ID of the supplier' })
-  @IsNumber()
+  @ApiProperty({ example: 'uuid-of-supplier' })
+  @IsString() // Changed to string to match common UUID practices
   supplierId: string;
 
-  @ApiProperty({ example: '2023-01-01', description: 'Date of the purchase' })
-  @IsDate()
-  purchaseDate: Date;
+  // Note: TotalAmount and PurchaseDate are usually handled by the server (Date.now)
+  // but if you want to allow manual input, keep these:
 
-  @ApiProperty({
-    example: 1500.75,
-    description: 'Total amount of the purchase',
-  })
-  @ApiProperty()
-  @IsNumber()
-  totalAmount: number;
-
-  @ApiProperty()
+  @ApiProperty({ type: [PurchaseItemDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PurchaseItemDto) // Crucial for nested validation and Swagger UI
   items: PurchaseItemDto[];
 }

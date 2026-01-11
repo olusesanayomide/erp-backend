@@ -1,6 +1,6 @@
 import { Body, Controller, Patch, Post, Param, Get } from '@nestjs/common';
 import { PurchaseService } from './purchase.service';
-import { createPurchaseDto } from './dto/create-purchase.dto';
+import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Purchase')
@@ -9,7 +9,7 @@ export class PurchaseContoller {
   constructor(private readonly purchaseService: PurchaseService) {}
 
   @Post('/Purchase Orders')
-  async create(@Body() dto: createPurchaseDto) {
+  async create(@Body() dto: CreatePurchaseDto) {
     return await this.purchaseService.createPurchase(dto);
   }
 
