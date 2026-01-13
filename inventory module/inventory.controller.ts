@@ -8,7 +8,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { StockMovementDto } from './dto/stock-movement.dto';
 
 @ApiTags('Inventory')
@@ -17,11 +17,29 @@ export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Get()
+  @ApiOperation({
+    summary: 'Get total inventory levels',
+    description:
+      'Calculates the sum of all stock movements across all warehouses to provide a global view of current stock.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return current stock levels for all products.',
+  })
   getAllInventory() {
     return this.inventoryService.getInventory();
   }
 
   @Get(':warehouseId')
+  @ApiOperation({
+    summary: 'Get inventory by warehouse',
+    description: 'Fetches stock levels filtered by a specific warehouse ID.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Warehouse stock details retrieved successfully.',
+  })
+  @ApiResponse({ status: 404, description: 'Warehouse not found or empty.' })
   async getWarehouseInventory(@Param('warehouseId') warehouseId: string) {
     const items =
       await this.inventoryService.getInventoryByWarehouse(warehouseId);
@@ -45,12 +63,25 @@ export class InventoryController {
   // }
 
   @Post('stock-in')
+  @ApiOperation({
+    summary: 'Manual Stock In',
+    description:
+      'Creates a positive stock movement event in the ledger. Use this for adjustments or initial loading.',
+  })
+  @ApiResponse({ status: 201, description: 'Stock increased successfully.' })
   async stockIn(@Body() dto: StockMovementDto) {
     const { productId, warehouseId, quantity } = dto;
     return this.inventoryService.stockIn(productId, warehouseId, quantity);
   }
 
   @Post('stock-out')
+  @ApiOperation({
+    summary: 'Manual Stock Out',
+    description:
+      'Creates a negative stock movement event in the ledger. Validates if enough stock exists before deducting.',
+  })
+  @ApiResponse({ status: 201, description: 'Stock decreased successfully.' })
+  @ApiResponse({ status: 400, description: 'Insufficient stock levels.' })
   async stockOut(@Body() dto: StockMovementDto) {
     const { productId, warehouseId, quantity } = dto;
     return this.inventoryService.stockOut(productId, warehouseId, quantity);

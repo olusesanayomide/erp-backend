@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { InventoryService } from 'inventory module/inventory.service';
 import { OrderStatus } from '@prisma/client';
@@ -85,6 +89,25 @@ export class OrdersService {
       include: { items: true },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  //  Get Order by Id
+  async getOrderById(id: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+        customer: true,
+      },
+    });
+    if (!order) {
+      throw new NotFoundException(`Order wiht ID ${id} not found`);
+    }
+    return order;
   }
 
   //   Update order status

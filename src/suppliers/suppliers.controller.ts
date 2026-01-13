@@ -20,6 +20,10 @@ export class SuppliersController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new supplier' })
+  @ApiResponse({
+    status: 201,
+    description: 'the supplier has successfully been created',
+  })
   create(@Body() createSupplierDto: CreateSupplierDto) {
     return this.suppliersService.create(createSupplierDto);
   }
