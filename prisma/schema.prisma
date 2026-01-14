@@ -26,9 +26,11 @@ model Role {
 model Warehouse {
   id   String @id @default(uuid())
   name String
+  location String?
   inventoryItems InventoryItem[]
   stockMovements StockMovement[]
   purchases Purchase[]
+  createdAt DateTime @default(now())
 }
 
 model Product {
@@ -110,7 +112,10 @@ model Customer{
   id String @id @default(uuid())
   name String
   email  String @unique
+  phone String?
+  address String?
   orders Order[] 
+  createdAt DateTime @default(now())
 }
 
 model Supplier {
