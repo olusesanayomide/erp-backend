@@ -36,7 +36,6 @@ export class SuppliersController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific supplier by ID' })
-  // ParseUUIDPipe ensures the ID is a valid UUID before it hits your service
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.suppliersService.findOne(id);
   }

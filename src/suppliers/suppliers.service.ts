@@ -15,7 +15,6 @@ export class SuppliersService {
 
   async findAll() {
     return this.prisma.supplier.findMany({
-      // Useful: include count of purchases to show activity in the UI
       include: {
         _count: {
           select: { purchases: true },

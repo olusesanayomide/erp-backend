@@ -1,26 +1,76 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
 import { UpdateWarehouseDto } from './dto/update-warehouse.dto';
+import { PrismaService } from 'prisma/prisma.service';
 
 @Injectable()
 export class WarehousesService {
-  create(createWarehouseDto: CreateWarehouseDto) {
-    return 'This action adds a new warehouse';
+  constructor(private prisma: PrismaService) {}
+
+  async create(createWarehouseDto: CreateWarehouseDto) {
+    return this.prisma.warehouse.create({
+      data: createWarehouseDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all warehouses`;
+  async findAll() {
+    return this.prisma.warehouse.findMany({
+      include: {
+        _count: {
+          select: { purchases: true },
+        },
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} warehouse`;
+  async findOne(id: string) {
+    const warehouse = await this.prisma.warehouse.findUnique({
+      where: { id },
+      include: {
+        inventoryItems: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+    if (!warehouse) {
+      throw new NotFoundException(`Warehouse with ID ${id} not found`);
+    }
+    return warehouse;
   }
 
-  update(id: number, updateWarehouseDto: UpdateWarehouseDto) {
-    return `This action updates a #${id} warehouse`;
+  async update(id: string, updateWarehouseDto: UpdateWarehouseDto) {
+    return this.prisma.warehouse.update({
+      where: { id },
+      data: updateWarehouseDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} warehouse`;
+  async remove(id: string) {
+    const warehouse = await this.prisma.warehouse.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            inventoryItems: true,
+            purchases: true,
+          },
+        },
+      },
+    });
+    if (!warehouse) {
+      throw new NotFoundException(`Warehouse with ID ${id} not found`);
+    }
+    if (warehouse._count.inventoryItems > 0) {
+      throw new BadRequestException(
+        'Cannot delete  warehouse: It still contains, inventory . Move stock to another stock location ',
+      );
+    }
+    return this.prisma.warehouse.delete({ where: { id } });
   }
 }
