@@ -7,9 +7,10 @@ import { OrdersModule } from 'order module/order.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { WarehousesModule } from './warehouses/warehouses.module';
 import { CustomersModule } from './customers/customers.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [InventoryModule, ProductsModule, OrdersModule, PurchaseModule, SuppliersModule, WarehousesModule, CustomersModule],
+  imports: [InventoryModule, ProductsModule, OrdersModule, PurchaseModule, SuppliersModule, WarehousesModule, CustomersModule, AuthModule],
   controllers: [],
   providers: [PrismaService],
 })
