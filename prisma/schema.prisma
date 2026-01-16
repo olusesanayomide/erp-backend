@@ -8,18 +8,24 @@ datasource db {
  }
 
 // USERS & RBAC
+enum UserRole {
+  ADMIN
+  STAFF
+  MANAGER
+}
+
+model Role {
+  id      String   @id @default(uuid())
+  name    UserRole @unique
+  users   User[]   @relation("UserRoles")
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
   roles     Role[]   @relation("UserRoles")
-}
-
-model Role {
-  id      String   @id @default(uuid())
-  name    String   @unique
-  users   User[]   @relation("UserRoles")
 }
 
 // INVENTORY
