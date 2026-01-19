@@ -7,9 +7,10 @@ async function bootstrap() {
   const app: INestApplication = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('API')
-    .setDescription('ERP API')
+    .setTitle('ERP API')
+    .setDescription('THE ERP API DESCRIPTION')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
