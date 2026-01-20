@@ -19,6 +19,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {

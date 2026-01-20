@@ -6,11 +6,20 @@ import {
   Param,
   // Query,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { StockMovementDto } from './dto/stock-movement.dto';
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
 
+@ApiBearerAuth('access-token')
+@UseGuards(JwtGuard)
 @ApiTags('Inventory')
 @Controller('inventory')
 export class InventoryController {

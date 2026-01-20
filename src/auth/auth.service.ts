@@ -4,12 +4,14 @@ import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
+    private config: ConfigService,
   ) {}
 
   //   Register User
@@ -53,8 +55,11 @@ export class AuthService {
       email: user.email,
       roles: user.roles.map((r) => r.name),
     };
-    // sign the  token and retur it
-    const token = await this.jwt.signAsync(payload);
+    // sign the  token and return it
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: '1h',
+      secret: this.config.get<string>('JWT_SECRET'),
+    });
     return {
       message: 'Logged in Successfully',
       access_token: token,

@@ -13,17 +13,15 @@ interface JwtPayLoad {
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(config: ConfigService) {
     super({
-      // Look for the token in the 'Authorization: Bearer <token>' header
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      // Use the same secret we used to sign the token
       secretOrKey: config.getOrThrow('JWT_SECRET'),
     });
   }
 
   // This method runs AFTER the token is successfully verified
   validate(payload: JwtPayLoad) {
-    // Whatever is returned here is appended to the Request object as 'req.user'
+    console.log('JWT Payload recieved:', payload);
     return {
       userId: payload.sub,
       email: payload.email,
