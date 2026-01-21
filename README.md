@@ -2,89 +2,89 @@
 
 A robust ERP backend built with **NestJS, Prisma, and PostgreSQL**. Unlike basic CRUD apps, this system uses a **ledger-based inventory engine** where stock is never edited—it is only moved.
 
-## Recent Updates
+##  Recent Updates
 
+* **Authentication & Security:** Implemented Global JWT Authentication with `Passport.js`.
+* **RBAC (Role-Based Access Control):** Added a custom `@Roles()` decorator system (Admin, Manager, Staff) to protect sensitive procurement and financial routes.
+* **Standardized Error Handling:** Refined Guards to return proper HTTP exceptions (`401 Unauthorized`, `403 Forbidden`) instead of generic server errors.
 * **Full Procurement Cycle:** Implemented Purchase Orders with automated stock-in on receipt.
-* **Sales/Orders Module:** Automated stock deduction linked to Customer orders.
 * **MDM (Master Data Management):** Added registry modules for Customers, Suppliers, and Warehouses.
-* **API Security:** Integrated `ParseUUIDPipe` for all relational lookups.
-* **Documentation:** 100% Swagger coverage with `@ApiOperation` and `@ApiResponse`.
 
 ---
 
-## Core Architecture: The "Ledger" Principle
+##  Core Architecture: The "Ledger" Principle
 
 The system follows a strict **Event Sourcing** mindset for physical goods:
 
-1. **Stock never changes directly.** You cannot "set" stock to 50.
-2. All changes are records in the `StockMovement` table (The Ledger).
-3. `InventoryItem` provides a calculated "Current Balance" snapshot.
-4. **Full Audit Trail:** Every unit of stock can be traced back to a Purchase Order or an Adjustment.
+1. **Stock never changes directly:** You cannot manually "set" stock to 50.
+2. **The Ledger:** All changes are immutable records in the `StockMovement` table.
+3. **Current Balance:** `InventoryItem` provides a calculated snapshot based on the sum of movements.
+4. **Audit Trail:** Every single unit of stock can be traced back to a specific Purchase Order, Sales Order, or manual Adjustment.
 
 ---
 
-## Project Modules
+##  Security & Roles
 
-### Master Data (The Registry)
+The API is locked by default. Access requires a valid JWT Bearer Token.
 
-* **Products:** The central catalog of SKUs and descriptions.
-* **Warehouses:** Physical storage locations with address tracking.
-* **Customers:** Sales targets with contact and history tracking.
-* **Suppliers:** Sources for procurement.
+| Role | Permissions |
+| --- | --- |
+| **Admin** | Full system access, User management, and System Configuration. |
+| **Manager** | Procurement approval, Inventory adjustments, and Sales management. |
+| **Staff** | View inventory, Create draft orders, and Receive shipments. |
 
-### Transactions (The Flow)
+**Usage:**
 
-* **Purchases:** Inbound flow. Creating a PO  Receiving  Positive Stock Movement.
-* **Orders (Sales):** Outbound flow. Creating Order  Shipping  Negative Stock Movement.
-* **Inventory:** The engine that calculates balances and logs manual adjustments.
-
----
-
-## Tech Stack
-
-* **Framework:** NestJS (Node.js)
-* **Database:** PostgreSQL
-* **ORM:** Prisma
-* **Docs:** Swagger (OpenAPI 3.0)
-* **Validation:** Class-validator & ParseUUIDPipes
-
----
-
-## API Navigation
-
-Once the server is running (`npm run start:dev`), visit:
-`http://localhost:3000/api`
-
-**Key Business Workflows to test in Swagger:**
-
-1. **Procurement:** `POST /purchases`  `PATCH /purchases/{id}/receive` (Watch stock go up).
-2. **Sales:** `POST /orders`  `POST /orders/{id}/items` (Prepare for shipment).
-3. **Inventory:** `GET /inventory/{warehouseId}` (Check current balances).
-
----
-
-## Project Structure
-
-```text
-src/
- ├── customers/    # Customer Registry
- ├── inventory/    # Ledger Engine (In/Out/Adjust)
- ├── orders/       # Sales Module
- ├── products/     # Catalog Management
- ├── purchases/    # Procurement Module
- ├── suppliers/    # Supplier Registry
- ├── warehouses/   # Location Management
- └── prisma/       # Schema & Migrations
+```typescript
+@Roles(Role.ADMIN)
+@Delete(':id')
+remove(@Param('id') id: string) { ... }
 
 ```
 
 ---
 
-## Roadmap
+##  Project Modules
+
+### Master Data (The Registry)
+
+* **Products:** The central catalog of SKUs and descriptions.
+* **Warehouses:** Physical storage locations with address tracking.
+* **Customers & Suppliers:** Registry for CRM and Procurement.
+
+### Transactions (The Flow)
+
+* **Purchases (Inbound):** `PO Created` → `Received` → `Positive Stock Movement`.
+* **Orders (Outbound):** `Order Created` → `Shipped` → `Negative Stock Movement`.
+* **Inventory:** The engine that calculates balances and logs manual adjustments.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Framework:** NestJS (Node.js)
+* **Database:** PostgreSQL + Prisma ORM
+* **Security:** Passport-JWT + Bcrypt
+* **Validation:** Class-validator & ParseUUIDPipes
+* **Docs:** Swagger (OpenAPI 3.0)
+
+---
+
+##  Getting Started
+
+1. **Environment Setup:** Create a `.env` file with `DATABASE_URL` and `JWT_SECRET`.
+2. **Install:** `npm install`
+3. **Database:** `npx prisma migrate dev`
+4. **Run:** `npm run start:dev`
+5. **Docs:** Visit `http://localhost:3000/api`
+
+---
+
+##  Roadmap
 
 * [x] Core Ledger Logic
 * [x] Sales & Procurement Integration
-* [x] Master Data Registry (Warehouse/Customer/Supplier)
-* [ ] **Next Phase:** Authentication (JWT) & RBAC Roles
-* [ ] **Future:** PDF Invoice Generation & Valuation Reports
-
+* [x] JWT Authentication & Global Guards
+* [x] Role-Based Access Control (RBAC)
+* [ ] **Next:** Multi-Warehouse Stock Transfers
+* [ ] **Future:** PDF Invoice Generation & Valuation Reports (FIFO/LIFO)
