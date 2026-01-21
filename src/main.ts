@@ -26,6 +26,14 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
+  // main.ts
+  app.use((req, _res, next) => {
+    console.log('--- NEW REQUEST ---');
+    console.log('Path:', req.path);
+    console.log('Auth Header:', req.headers.authorization);
+    next();
+  });
+
   await app.listen(process.env.PORT ?? 3000);
 
   app.useGlobalPipes(
