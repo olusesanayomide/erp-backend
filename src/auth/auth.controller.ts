@@ -19,7 +19,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-
+@ApiBearerAuth('access-token')
+@UseGuards(JwtGuard)
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
@@ -47,8 +48,6 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtGuard)
   @Get('me')
   @ApiOperation({ summary: 'Get current logged-in user profile' })
   @ApiResponse({ status: 200, description: 'Returns user payload from token.' })

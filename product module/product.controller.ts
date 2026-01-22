@@ -7,12 +7,24 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiResponse,
+  ApiOperation,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ProductService } from './product.service';
 import { Product } from '@prisma/client';
 import { ProductDto, UpdateProductDto } from './dto/product.dto';
+import { Roles } from 'src/auth/decorator/role.decorator';
+import { Role } from 'src/auth/enums/role.enum';
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { RolesGuard } from 'src/auth/guard/role.guard';
 
+@ApiBearerAuth('access-token')
+@UseGuards(JwtGuard, RolesGuard)
 @ApiTags('products')
 @Controller('products')
 export class ProductController {
@@ -20,6 +32,7 @@ export class ProductController {
 
   //   get all products
   @Get()
+  @Roles(Role.ADMIN)
   @ApiOperation({
     summary: 'List all products',
     description:
@@ -45,8 +58,9 @@ export class ProductController {
 
   //   create product
   @Post()
+  @Roles(Role.ADMIN)
   @ApiOperation({
-    summary: 'Create a new product',
+    summary: 'ADMIN ONLY: Create a new product',
     description:
       'Adds a new item to the master catalog. This does not set stock levels (use Inventory Stock-In for that).',
   })

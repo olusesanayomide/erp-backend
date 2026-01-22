@@ -10,6 +10,7 @@ import { CustomersModule } from './customers/customers.module';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './auth/guard/jwt.guard';
+import { RolesGuard } from './auth/guard/role.guard';
 
 @Module({
   imports: [
@@ -23,6 +24,10 @@ import { JwtGuard } from './auth/guard/jwt.guard';
     AuthModule,
   ],
   controllers: [],
-  providers: [PrismaService, { provide: APP_GUARD, useClass: JwtGuard }],
+  providers: [
+    PrismaService,
+    { provide: APP_GUARD, useClass: JwtGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+  ],
 })
 export class AppModule {}
