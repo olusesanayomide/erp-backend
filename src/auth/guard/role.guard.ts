@@ -33,9 +33,9 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('User Authenticated or no roles found');
     }
 
-    const requiredRolesStrings = requiredRoles.map((role) => role.toString());
+    const requiredRolesStrings = requiredRoles.map((role) => String(role));
 
-    const userRolesStrings = user.roles.map((role) => role.toString());
+    const userRolesStrings = user.roles.map((role) => String(role));
 
     const hasRole = requiredRolesStrings.some((role) =>
       userRolesStrings.includes(role),
@@ -43,9 +43,10 @@ export class RolesGuard implements CanActivate {
 
     if (!hasRole) {
       throw new ForbiddenException(
-        `Access Denied: Role [${userRolesStrings.join(', ')}] lacks permission. Required: [${requiredRolesStrings.join(', ')}]`,
+        `Access Denied: Your role [${userRolesStrings.join(', ')}] does not have permission. Required: [${requiredRolesStrings.join(', ')}]`,
       );
     }
+
     return true;
   }
 }
