@@ -7,18 +7,31 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { WarehousesService } from './warehouses.service';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
 import { UpdateWarehouseDto } from './dto/update-warehouse.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBasicAuth,
+} from '@nestjs/swagger';
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { RolesGuard } from 'src/auth/guard/role.guard';
+import { Roles } from 'src/auth/decorator/role.decorator';
+import { Role } from 'src/auth/enums/role.enum';
 
+@ApiBasicAuth('access-token')
+@UseGuards(JwtGuard, RolesGuard)
 @ApiTags('Master Data: Warehouses') // Groups these endpoints in Swagger UI
 @Controller('warehouses')
 export class WarehousesController {
   constructor(private readonly warehousesService: WarehousesService) {}
 
   @Post()
+  @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({
     summary: 'Create a new warehouse',
     description: 'Registers a physical or virtual storage location.',
@@ -30,6 +43,7 @@ export class WarehousesController {
   }
 
   @Get()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.STAFF)
   @ApiOperation({
     summary: 'List all warehouses',
     description:
@@ -41,6 +55,7 @@ export class WarehousesController {
   }
 
   @Get(':id')
+  @Roles(Role.ADMIN, Role.MANAGER, Role.STAFF)
   @ApiOperation({
     summary: 'Get warehouse details',
     description:
@@ -53,6 +68,7 @@ export class WarehousesController {
   }
 
   @Patch(':id')
+  @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({
     summary: 'Update warehouse',
     description: 'Update the name or location of an existing warehouse.',
@@ -67,6 +83,7 @@ export class WarehousesController {
   }
 
   @Delete(':id')
+  @Roles(Role.ADMIN)
   @ApiOperation({
     summary: 'Delete warehouse',
     description:

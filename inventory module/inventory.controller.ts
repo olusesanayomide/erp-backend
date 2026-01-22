@@ -17,15 +17,19 @@ import {
 } from '@nestjs/swagger';
 import { StockMovementDto } from './dto/stock-movement.dto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { RolesGuard } from 'src/auth/guard/role.guard';
+import { Roles } from 'src/auth/decorator/role.decorator';
+import { Role } from 'src/auth/enums/role.enum';
 
 @ApiBearerAuth('access-token')
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiTags('Inventory')
 @Controller('inventory')
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Get()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.STAFF)
   @ApiOperation({
     summary: 'Get total inventory levels',
     description:
@@ -40,6 +44,7 @@ export class InventoryController {
   }
 
   @Get(':warehouseId')
+  @Roles(Role.ADMIN, Role.MANAGER, Role.STAFF)
   @ApiOperation({
     summary: 'Get inventory by warehouse',
     description: 'Fetches stock levels filtered by a specific warehouse ID.',
@@ -72,6 +77,7 @@ export class InventoryController {
   // }
 
   @Post('stock-in')
+  @Roles(Role.MANAGER, Role.ADMIN)
   @ApiOperation({
     summary: 'Manual Stock In',
     description:
@@ -84,6 +90,7 @@ export class InventoryController {
   }
 
   @Post('stock-out')
+  @Roles(Role.MANAGER, Role.ADMIN)
   @ApiOperation({
     summary: 'Manual Stock Out',
     description:

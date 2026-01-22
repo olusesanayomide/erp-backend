@@ -6,6 +6,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { OrdersService } from './order.service';
 import {
@@ -13,14 +14,26 @@ import {
   AddOrderItemDto,
   UpdateOrderStatusDto,
 } from './dto/order.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBasicAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Roles } from 'src/auth/decorator/role.decorator';
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { RolesGuard } from 'src/auth/guard/role.guard';
+import { Role } from 'src/auth/enums/role.enum';
 
+@ApiBasicAuth('access-token')
+@UseGuards(JwtGuard, RolesGuard)
 @ApiTags('orders')
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Get()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.STAFF)
   @ApiOperation({
     summary: 'List all orders',
     description:
@@ -32,6 +45,7 @@ export class OrdersController {
   }
 
   @Get(':id')
+  @Roles(Role.ADMIN, Role.MANAGER, Role.STAFF)
   @ApiOperation({
     summary: 'Get order details',
     description:
@@ -43,6 +57,7 @@ export class OrdersController {
   }
 
   @Post()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.STAFF)
   @ApiOperation({
     summary: 'Initialize a new order',
     description:
@@ -58,6 +73,7 @@ export class OrdersController {
   }
 
   @Post(':id/items')
+  @Roles(Role.ADMIN, Role.MANAGER, Role.STAFF)
   @ApiOperation({
     summary: 'Add item to order',
     description:
@@ -76,6 +92,7 @@ export class OrdersController {
   }
 
   @Patch(':id/status')
+  @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({
     summary: 'Update order status',
     description:
@@ -84,7 +101,7 @@ export class OrdersController {
   @ApiResponse({ status: 200, description: 'Status updated successfully.' })
   @ApiResponse({ status: 400, description: 'Invalid status transition.' })
   updateStatus(
-    @Param('id') orderId: string,
+    @Param('id', ParseUUIDPipe) orderId: string,
     @Body() dto: UpdateOrderStatusDto,
   ) {
     return this.ordersService.updateStatus(orderId, dto.status);

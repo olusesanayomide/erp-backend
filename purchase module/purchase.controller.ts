@@ -1,14 +1,34 @@
-import { Body, Controller, Patch, Post, Param, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Patch,
+  Post,
+  Param,
+  Get,
+  UseGuards,
+} from '@nestjs/common';
 import { PurchaseService } from './purchase.service';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBasicAuth,
+} from '@nestjs/swagger';
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { RolesGuard } from 'src/auth/guard/role.guard';
+import { Role } from 'src/auth/enums/role.enum';
+import { Roles } from 'src/auth/decorator/role.decorator';
 
+@ApiBasicAuth('access-token')
+@UseGuards(JwtGuard, RolesGuard)
 @ApiTags('Purchase')
 @Controller()
 export class PurchaseContoller {
   constructor(private readonly purchaseService: PurchaseService) {}
 
   @Post()
+  @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({
     summary: 'Create a Purchase Order',
     description:
@@ -21,6 +41,7 @@ export class PurchaseContoller {
   }
 
   @Patch(':id/receive')
+  @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({
     summary: 'Receive Goods',
     description:
@@ -39,6 +60,7 @@ export class PurchaseContoller {
   }
 
   @Get(':id')
+  @Roles(Role.ADMIN, Role.MANAGER, Role.STAFF)
   @ApiOperation({
     summary: 'Get PO details',
     description:

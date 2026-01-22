@@ -7,18 +7,31 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { SuppliersService } from './suppliers.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBasicAuth,
+} from '@nestjs/swagger';
+import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { RolesGuard } from 'src/auth/guard/role.guard';
+import { Role } from 'src/auth/enums/role.enum';
+import { Roles } from 'src/auth/decorator/role.decorator';
 
+@ApiBasicAuth('access-token')
+@UseGuards(JwtGuard, RolesGuard)
 @ApiTags('Master Data: Suppliers')
 @Controller('suppliers')
 export class SuppliersController {
   constructor(private readonly suppliersService: SuppliersService) {}
 
   @Post()
+  @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Create a new supplier' })
   @ApiResponse({
     status: 201,
@@ -29,18 +42,21 @@ export class SuppliersController {
   }
 
   @Get()
+  @Roles(Role.ADMIN, Role.MANAGER, Role.STAFF)
   @ApiOperation({ summary: 'Fetch all suppliers' })
   findAll() {
     return this.suppliersService.findAll();
   }
 
   @Get(':id')
+  @Roles(Role.ADMIN, Role.MANAGER, Role.STAFF)
   @ApiOperation({ summary: 'Get a specific supplier by ID' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.suppliersService.findOne(id);
   }
 
   @Patch(':id')
+  @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Update supplier details' })
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -50,6 +66,7 @@ export class SuppliersController {
   }
 
   @Delete(':id')
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Delete a supplier' })
   @ApiResponse({ status: 200, description: 'Supplier deleted successfully' })
   remove(@Param('id', ParseUUIDPipe) id: string) {

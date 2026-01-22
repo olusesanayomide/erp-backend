@@ -32,7 +32,7 @@ export class ProductController {
 
   //   get all products
   @Get()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MANAGER, Role.STAFF)
   @ApiOperation({
     summary: 'List all products',
     description:
@@ -45,6 +45,7 @@ export class ProductController {
 
   //   get product by id
   @Get(':id')
+  @Roles(Role.ADMIN, Role.MANAGER, Role.STAFF)
   @ApiOperation({
     summary: 'Get product by ID',
     description:
@@ -57,6 +58,7 @@ export class ProductController {
   }
 
   //   create product
+  @Roles(Role.ADMIN, Role.MANAGER)
   @Post()
   @Roles(Role.ADMIN)
   @ApiOperation({
@@ -71,6 +73,7 @@ export class ProductController {
 
   // Update a product
   @Put(':id')
+  @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({
     summary: 'Update product details',
     description:
@@ -87,6 +90,7 @@ export class ProductController {
 
   //  Delete a product
   @Delete(':id')
+  @Roles(Role.ADMIN)
   @ApiOperation({
     summary: 'Archive/Delete product',
     description:
