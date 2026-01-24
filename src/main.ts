@@ -6,9 +6,21 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app: INestApplication = await NestFactory.create(AppModule);
 
+  // 1. GLOBAL MIDDLEWARE & PIPES (Must come BEFORE listen)
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
+  app.enableCors();
+
+  // 2. SWAGGER CONFIGURATION
   const config = new DocumentBuilder()
     .setTitle('ERP API')
-    .setDescription('THE ERP API DESCRIPTION')
+    .setDescription('The core engine for Inventory, Orders, and Procurement.')
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -26,25 +38,14 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  // main.ts
-  app.use((req, _res, next) => {
-    console.log('--- NEW REQUEST ---');
-    console.log('Path:', req.path);
-    console.log('Auth Header:', req.headers.authorization);
-    next();
-  });
-
-  app.enableCors();
+  // 3. START THE SERVER
+  // Render provides the PORT variable; default to 3000 locally
   const port = process.env.PORT || 3000;
-  await app.listen(port);
-  console.log(`ERP is running on : ${await app.getUrl()}`);
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
+  await app.listen(port);
+
+  // Use a simple log since getUrl() can sometimes be finicky in certain cloud environments
+  console.log(`🚀 ERP API is live on port ${port}`);
+  console.log(`📖 Swagger docs available at /api`);
 }
 bootstrap();
