@@ -18,13 +18,15 @@ export class WarehousesService {
   }
 
   async findAll() {
-    return this.prisma.warehouse.findMany({
+    const data = await this.prisma.warehouse.findMany({
       include: {
         _count: {
           select: { purchases: true },
         },
       },
     });
+    console.log('Warehouse in DB ', data);
+    return data;
   }
 
   async findOne(id: string) {
