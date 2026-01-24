@@ -34,7 +34,10 @@ async function bootstrap() {
     next();
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  app.enableCors();
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  console.log(`ERP is running on : ${await app.getUrl()}`);
 
   app.useGlobalPipes(
     new ValidationPipe({
