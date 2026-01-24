@@ -36,7 +36,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('/', app, document);
 
   // 3. START THE SERVER
   // Render provides the PORT variable; default to 3000 locally
